@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>音乐播放按钮</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 圆形音乐按钮 */
+#musicBtn {
+  position: relative;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(155,189,203,.6);
+
+  background: rgba(34,57,73,.42);
+  color: #e3f0f3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+#musicBtn:hover {
+  transform: scale(1.08);
+  background: rgba(53,81,98,.65);
+}
+
+#musicBtn:focus-visible {
+  outline: 2px solid #f1ca99;
+  outline-offset: 5px;
+}
+
+/* 播放时高亮 */
+#musicBtn.playing {
+  border-color: #e5bd8c;
+  background: rgba(83,76,65,.56);
+  box-shadow: 0 0 22px rgba(232,182,114,.25);
+}
+
+/* 播放时扩散光环 */
+#musicBtn.playing::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(232,190,137,.5);
+  border-radius: 50%;
+  animation: pulse 2.2s infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: .7;
+    transform: scale(.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+#musicBtn svg {
+  width: 29px;
+  height: 29px;
+}
+
+#stopIcon {
+  display: none;
+}
+
+#musicBtn.playing #noteIcon {
+  display: none;
+}
+
+#musicBtn.playing #stopIcon {
+  display: block;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 音乐文件 -->
+<audio
+  id="music"
+  src="./music2.mp3"
+  preload="metadata"
+  loop>
+</audio>
+
+<!-- 音乐图标按钮 -->
+<button
+  id="musicBtn"
+  type="button"
+  aria-label="播放音乐"
+  aria-pressed="false"
+  title="点击播放音乐">
+
+  <!-- 音乐图标 -->
+  <svg id="noteIcon" viewBox="0 0 32 32"
+       fill="none" aria-hidden="true">
+    <path
+      d="M13 7.8 25.8 5v16.7
+         M13 7.8v17
+         M13 7.8l12.8-2.8"
+      stroke="currentColor"
+      stroke-width="2.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <ellipse cx="9" cy="25.2"
+      rx="4.1" ry="2.8"
+      fill="currentColor"/>
+    <ellipse cx="21.8" cy="21.7"
+      rx="4.1" ry="2.8"
+      fill="currentColor"/>
+  </svg>
+
+  <!-- 停止图标 -->
+  <svg id="stopIcon" viewBox="0 0 32 32"
+       fill="none" aria-hidden="true">
+    <rect x="9" y="9"
+      width="14" height="14"
+      rx="2.5"
+      fill="currentColor"/>
+  </svg>
+
+</button>
+
+<script>
+const music = document.getElementById("music");
+const btn = document.getElementById("musicBtn");
+
+// 无限制循环
+music.loop = true;
+
+// 音量：0~1
+music.volume = 0.85;
+
+function updateButton(playing) {
+  btn.classList.toggle("playing", playing);
+  btn.setAttribute(
+    "aria-label",
+    playing ? "停止音乐" : "播放音乐"
+  );
+  btn.setAttribute("aria-pressed", String(playing));
+}
+
+btn.addEventListener("click", async () => {
+
+  if (!music.paused) {
+    // 再次点击：停止并回到开头
+    music.pause();
+    music.currentTime = 0;
+    updateButton(false);
+
+  } else {
+    // 点击：开始播放
+    try {
+      music.currentTime = 0;
+      await music.play();
+      updateButton(true);
+    } catch (error) {
+      updateButton(false);
+      alert("播放失败，请检查 music2.mp3");
+    }
+  }
+
+});
+
+music.addEventListener("playing", () => {
+  updateButton(true);
+});
+
+music.addEventListener("pause", () => {
+  updateButton(false);
+});
+</script>
+
+</body>
+</html>
